@@ -1,0 +1,108 @@
+ibrary("seewave")
+library("tuneR")
+library("warbleR")
+library("soundecology")
+
+
+
+##preparo un objeto donde estaran los resultados##
+
+setwd("C:/Users/hp/Downloads/Articulo bioacustica/Analisis/Aracataca/Sonido/Data")
+
+setwd("C:/Users/hp/Downloads/Articulo bioacustica/Analisis/Kankarawa")
+
+setwd("C:/Users/hp/Downloads/Articulo bioacustica/Analisis/Kochucua/Data")
+
+setwd("C:/Users/hp/Downloads/Articulo bioacustica/Analisis/Umake")
+
+
+info_wavs("C:/Users/hp/Downloads/Articulo bioacustica/Analisis/Aracataca")
+
+
+files <- dir(pattern = "wav$")
+  
+n <- length(files) 
+
+
+
+##Acoustic Richness###
+
+res_AR <- AR(getwd(), datatype = "files")
+
+## Escribo los resultados ##
+
+write.csv(res_AR, file = "results_AR.csv")  
+
+
+## AEI ##
+
+
+aei_index <- function(x) {
+  x <- readWave(x) 
+  return (acoustic_evenness(x, freq_step=1000)$aei_left) }
+
+
+
+n <- length(files) 
+num <- rep(NA, n) 
+
+## preparo un objeto donde estaran las grabaciones ###
+
+res_aei <- data.frame(aei = num, row.names=files)
+
+
+###Loop##
+
+for(i in 1:n) 
+  res_aei[i,] <- aei_index(files[i])
+
+## Escribo los resultados ##
+
+write.csv(res_aei, "res_aei.csv")
+
+### ADI ###
+
+adi_index <- function(x) {
+  x <- readWave(x) 
+  return (acoustic_diversity(x, freq_step=1000)$adi_left) }
+
+
+n <- length(files) 
+num <- rep(NA, n) 
+
+res_adi <- data.frame(adi = num, row.names=files)
+
+###Loop##
+
+for(i in 1:n) 
+  res_adi[i,] <- adi_index(files[i])
+
+## Escribo los resultados ##
+
+write.csv(res_adi, "res_adi.csv")
+
+
+## H-ACI-Bio-NDSI ##
+
+h.aci.bio.ndsi_indices <- function(x) {
+  x <- readWave(x) 
+  return (c(ACI(x),H(x), bioacoustic_index(x), 
+            NDSI(soundscapespec(x, plot=FALSE)
+                 )))}
+
+
+n <- length(files) 
+num <- rep(NA, n) 
+
+res.aci.h.bio.ndsi <- data.frame(ACI = num, H = num, Bio = num, NDSI = num, row.names=files)
+
+View(res.aci.h.bio.ndsi)
+
+###Loop##
+
+for(i in 1:n) 
+  res.aci.h.bio.ndsi [i,] <- h.aci.bio.ndsi_indices(files[i])
+
+## Escribo los resultados ##
+
+write.csv(res.aci.h.bio.ndsi, "res_aci.h.bio.ndsi.csv")
